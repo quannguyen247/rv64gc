@@ -1,0 +1,40 @@
+# Vivado
+.Xil/
+Implementation/.Xil/
+Implementation/*.log
+Implementation/*.jou
+Implementation/*.str
+Implementation/logs/
+*.cache/
+*.hw/
+*.ip_user_files/
+*.sim/
+*.runs/
+*.ioplanning/
+
+# ModelSim / Simulation
+build/
+work/
+transcript
+vsim.wlf
+*.wlf
+xsim.dir/
+xsim.log
+xsim.jou
+webtalk*
+modelsim.ini
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.bak
+*~
+.vscode/
+.idea/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
