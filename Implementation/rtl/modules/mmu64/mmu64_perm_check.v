@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 `include "mmu64_defs.vh"
 
-module mmu64_perm_check (
+module mmu64_perm_check(
     input wire [1:0] access_type,
     input wire [1:0] priv_mode,
     input wire pte_r,
@@ -20,46 +20,38 @@ module mmu64_perm_check (
     always @(*) begin
         perm_fail = 1'b0;
 
-        if (!pte_a) begin
+        if (!pte_a)
             perm_fail = 1'b1;
-        end
 
-        if (access_type == `ACC_STORE && !pte_d) begin
+        if (access_type == `ACC_STORE && !pte_d)
             perm_fail = 1'b1;
-        end
 
         case (priv_mode)
             `PRIV_U: begin
-                if (!pte_u) begin
+                if (!pte_u)
                     perm_fail = 1'b1;
-                end
             end
             `PRIV_S: begin
-                if (pte_u && !mstatus_sum) begin
+                if (pte_u && !mstatus_sum)
                     perm_fail = 1'b1;
-                end
-                if (pte_u && access_type == `ACC_EXEC) begin
+                if (pte_u && access_type == `ACC_EXEC)
                     perm_fail = 1'b1;
-                end
             end
             default: ;
         endcase
 
         case (access_type)
             `ACC_LOAD: begin
-                if (!pte_r && !(mstatus_mxr && pte_x)) begin
+                if (!pte_r && !(mstatus_mxr && pte_x))
                     perm_fail = 1'b1;
-                end
             end
             `ACC_STORE: begin
-                if (!pte_w) begin
+                if (!pte_w)
                     perm_fail = 1'b1;
-                end
             end
             `ACC_EXEC: begin
-                if (!pte_x) begin
+                if (!pte_x)
                     perm_fail = 1'b1;
-                end
             end
             default: perm_fail = 1'b1;
         endcase
