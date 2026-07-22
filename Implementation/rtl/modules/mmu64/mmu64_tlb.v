@@ -3,22 +3,25 @@
 
 module mmu64_tlb #(
     parameter ENTRIES = `TLB_ENTRIES
-) (
+)(
     input wire clk,
     input wire rst_n,
+
     input wire [`VPN_TOTAL_W-1:0] lookup_vpn,
     input wire lookup_req,
     input wire [15:0] lookup_asid,
-    output reg lookup_hit,
+    output wire lookup_hit,
     output reg [`PPN_WIDTH-1:0] lookup_ppn,
     output reg [7:0] lookup_flags,
     output reg [1:0] lookup_page_size,
+
     input wire write_en,
     input wire [`VPN_TOTAL_W-1:0] write_vpn,
     input wire [`PPN_WIDTH-1:0] write_ppn,
     input wire [7:0] write_flags,
     input wire [1:0] write_page_size,
     input wire [15:0] write_asid,
+
     input wire flush
 );
 
@@ -28,8 +31,14 @@ module mmu64_tlb #(
     wire [ENTRIES*8-1:0] entry_flags_flat;
     wire [ENTRIES*2-1:0] entry_pgsz_flat;
 
-    reg [`TLB_IDX_W-1:0] rr_ctr;
-    reg [`TLB_IDX_W-1:0] replace_idx;
+    localparam integer IDX_W = (ENTRIES > 1) ? $clog2(ENTRIES) : 1;
+    localparam [IDX_W-1:0] LAST_IDX = ENTRIES - 1;
+
+    reg [IDX_W-1:0] rr_ctr;
+    reg [IDX_W-1:0] replace_idx;
+
+    integer lookup_i;
+    integer replace_i;
 
     genvar g;
     generate
@@ -38,7 +47,6 @@ module mmu64_tlb #(
                 .clk(clk),
                 .rst_n(rst_n),
                 .flush(flush),
-                .lookup_req(lookup_req),
                 .lookup_vpn(lookup_vpn),
                 .lookup_asid(lookup_asid),
                 .match(match[g]),
@@ -56,47 +64,45 @@ module mmu64_tlb #(
         end
     endgenerate
 
-    integer i;
+    assign lookup_hit = lookup_req && (|match);
+
     always @(*) begin
-        lookup_hit = 1'b0;
         lookup_ppn = {`PPN_WIDTH{1'b0}};
         lookup_flags = 8'h0;
         lookup_page_size = 2'b00;
 
-        for (i = ENTRIES - 1; i >= 0; i = i - 1) begin
-            if (match[i]) begin
-                lookup_hit = 1'b1;
-                lookup_ppn = entry_ppn_flat[i*`PPN_WIDTH +: `PPN_WIDTH];
-                lookup_flags = entry_flags_flat[i*8 +: 8];
-                lookup_page_size = entry_pgsz_flat[i*2 +: 2];
+        for (lookup_i = ENTRIES - 1; lookup_i >= 0; lookup_i = lookup_i - 1) begin
+            if (match[lookup_i]) begin
+                lookup_ppn = entry_ppn_flat[lookup_i*`PPN_WIDTH +: `PPN_WIDTH];
+                lookup_flags = entry_flags_flat[lookup_i*8 +: 8];
+                lookup_page_size = entry_pgsz_flat[lookup_i*2 +: 2];
             end
         end
     end
 
     always @(*) begin
         replace_idx = rr_ctr;
-        for (i = ENTRIES - 1; i >= 0; i = i - 1) begin
-            if (!entry_valid[i]) begin
-                replace_idx = i[`TLB_IDX_W-1:0];
-            end
+        for (replace_i = ENTRIES - 1; replace_i >= 0; replace_i = replace_i - 1) begin
+            if (!entry_valid[replace_i]) replace_idx = replace_i[IDX_W-1:0];
         end
     end
 
     always @(posedge clk) begin
         if (!rst_n || flush) begin
-            rr_ctr <= {`TLB_IDX_W{1'b0}};
+            rr_ctr <= {IDX_W{1'b0}};
         end else if (write_en) begin
-            rr_ctr <= rr_ctr + 1'b1;
+            if (rr_ctr == LAST_IDX) rr_ctr <= {IDX_W{1'b0}};
+            else rr_ctr <= rr_ctr + 1'b1;
         end
     end
 
 endmodule
 
-module mmu64_tlb_entry (
+module mmu64_tlb_entry(
     input wire clk,
     input wire rst_n,
     input wire flush,
-    input wire lookup_req,
+
     input wire [`VPN_TOTAL_W-1:0] lookup_vpn,
     input wire [15:0] lookup_asid,
     output wire match,
@@ -104,6 +110,7 @@ module mmu64_tlb_entry (
     output wire [`PPN_WIDTH-1:0] entry_ppn,
     output wire [7:0] entry_flags,
     output wire [1:0] entry_page_size,
+
     input wire write_en,
     input wire [`VPN_TOTAL_W-1:0] write_vpn,
     input wire [`PPN_WIDTH-1:0] write_ppn,
@@ -118,13 +125,14 @@ module mmu64_tlb_entry (
     reg [7:0] flags_q;
     reg [1:0] pgsz_q;
     reg [15:0] asid_q;
+    reg vpn_match;
+    wire asid_match;
 
     assign entry_valid = valid_q;
     assign entry_ppn = ppn_q;
     assign entry_flags = flags_q;
     assign entry_page_size = pgsz_q;
 
-    reg vpn_match;
     always @(*) begin
         case (pgsz_q)
             2'd0: vpn_match = (vpn_q == lookup_vpn);
@@ -134,8 +142,8 @@ module mmu64_tlb_entry (
         endcase
     end
 
-    wire asid_match = flags_q[`PTE_G] || (asid_q == lookup_asid);
-    assign match = lookup_req && valid_q && asid_match && vpn_match;
+    assign asid_match = flags_q[`PTE_G] || (asid_q == lookup_asid);
+    assign match = valid_q && asid_match && vpn_match;
 
     always @(posedge clk) begin
         if (!rst_n || flush) begin
