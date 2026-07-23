@@ -105,7 +105,7 @@ module rv64gc_lsu (
 
     always @(*) begin
         reg_rdata = loaded_val;
-        fpr_rdata = loaded_val;
+        fpr_rdata = (funct3 == 3'b010) ? {32'hFFFFFFFF, shifted_rdata[31:0]} : shifted_rdata;
         if (is_sc) begin
             reg_rdata = sc_success ? 64'd0 : 64'd1;
         end
