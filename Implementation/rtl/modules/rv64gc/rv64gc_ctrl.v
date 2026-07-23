@@ -250,17 +250,41 @@ module rv64gc_ctrl (
                     end
                     5'b11100: begin
                         rf_we_gpr = 1'b1;
-                        fpu_op = (funct3 == 3'b000) ? (inst[20] ? `F_MVTX : `F_CLASS) : `F_MVTX;
+                        fpu_op = (funct3 == 3'b001) ? `F_CLASS : `F_MVXT;
                         wb_sel = 3'd7;
                     end
                     5'b11110: begin
                         rf_we_fpr = 1'b1;
-                        fpu_op = `F_MVXT;
+                        fpu_op = `F_MVTX;
                         wb_sel = 3'd5;
                     end
                     default: begin
                     end
                 endcase
+            end
+            7'b1000011: begin
+                rf_we_fpr = 1'b1;
+                wb_sel = 3'd5;
+                fpu_op = `F_MADD;
+                fpu_is_double = inst[25];
+            end
+            7'b1000111: begin
+                rf_we_fpr = 1'b1;
+                wb_sel = 3'd5;
+                fpu_op = `F_MSUB;
+                fpu_is_double = inst[25];
+            end
+            7'b1001011: begin
+                rf_we_fpr = 1'b1;
+                wb_sel = 3'd5;
+                fpu_op = `F_NMSUB;
+                fpu_is_double = inst[25];
+            end
+            7'b1001111: begin
+                rf_we_fpr = 1'b1;
+                wb_sel = 3'd5;
+                fpu_op = `F_NMADD;
+                fpu_is_double = inst[25];
             end
             7'b1110011: begin
                 if (funct3 != 3'b000) begin
