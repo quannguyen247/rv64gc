@@ -48,16 +48,16 @@ module rv64gc_decompress (
                 2'b00: begin
                     case (funct3)
                         3'b000: begin
-                            inst_out = {{2'b00, inst_in[10:7], inst_in[12:11], inst_in[5], inst_in[6], 2'b00}, 5'd2, 3'b000, reg_c_rd_rs1, 7'b0010011};
+                            inst_out = {{2'b00, inst_in[10:7], inst_in[12:11], inst_in[5], inst_in[6], 2'b00}, 5'd2, 3'b000, reg_c_rs2, 7'b0010011};
                         end
                         3'b001: begin
-                            inst_out = {{4'd0, inst_in[6:5], inst_in[12:10], 3'b000}, reg_c_rd_rs1, 3'b011, reg_c_rd_rs1, 7'b0000111};
+                            inst_out = {{4'd0, inst_in[6:5], inst_in[12:10], 3'b000}, reg_c_rd_rs1, 3'b011, reg_c_rs2, 7'b0000111};
                         end
                         3'b010: begin
-                            inst_out = {{5'd0, inst_in[5], inst_in[12:10], inst_in[6], 2'b00}, reg_c_rd_rs1, 3'b010, reg_c_rd_rs1, 7'b0000011};
+                            inst_out = {{5'd0, inst_in[5], inst_in[12:10], inst_in[6], 2'b00}, reg_c_rd_rs1, 3'b010, reg_c_rs2, 7'b0000011};
                         end
                         3'b011: begin
-                            inst_out = {{4'd0, inst_in[6:5], inst_in[12:10], 3'b000}, reg_c_rd_rs1, 3'b011, reg_c_rd_rs1, 7'b0000011};
+                            inst_out = {{4'd0, inst_in[6:5], inst_in[12:10], 3'b000}, reg_c_rd_rs1, 3'b011, reg_c_rs2, 7'b0000011};
                         end
                         3'b101: begin
                             inst_out = {fsd_imm[11:5], reg_c_rs2, reg_c_rd_rs1, 3'b011, fsd_imm[4:0], 7'b0100111};
@@ -165,7 +165,11 @@ module rv64gc_decompress (
                                 end
                             end else begin
                                 if (rs2_f == 5'd0) begin
-                                    inst_out = {12'd0, rd_rs1_f, 3'b000, 5'd1, 7'b1100111};
+                                    if (rd_rs1_f == 5'd0) begin
+                                        inst_out = 32'h00100073;
+                                    end else begin
+                                        inst_out = {12'd0, rd_rs1_f, 3'b000, 5'd1, 7'b1100111};
+                                    end
                                 end else begin
                                     inst_out = {7'b0000000, rs2_f, rd_rs1_f, 3'b000, rd_rs1_f, 7'b0110011};
                                 end
