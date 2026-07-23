@@ -42,10 +42,12 @@ module rv64gc_rf (
         end
     end
 
-    assign rs1_data = (rs1 == 5'd0) ? 64'd0 : gpr[rs1];
-    assign rs2_data = (rs2 == 5'd0) ? 64'd0 : gpr[rs2];
-    assign frs1_data = fpr[frs1];
-    assign frs2_data = fpr[frs2];
-    assign frs3_data = fpr[frs3];
+    assign rs1_data = (rs1 == 5'd0) ? 64'd0 :
+                      (we_gpr && (rd == rs1)) ? wdata_gpr : gpr[rs1];
+    assign rs2_data = (rs2 == 5'd0) ? 64'd0 :
+                      (we_gpr && (rd == rs2)) ? wdata_gpr : gpr[rs2];
+    assign frs1_data = (we_fpr && (frd == frs1)) ? wdata_fpr : fpr[frs1];
+    assign frs2_data = (we_fpr && (frd == frs2)) ? wdata_fpr : fpr[frs2];
+    assign frs3_data = (we_fpr && (frd == frs3)) ? wdata_fpr : fpr[frs3];
 
 endmodule
