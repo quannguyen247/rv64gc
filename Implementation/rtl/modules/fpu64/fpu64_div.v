@@ -245,7 +245,7 @@ module fpu64_div (
     end
 
     // Sequential State Machine
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             state <= S_IDLE;
             valid_out <= 1'b0;
