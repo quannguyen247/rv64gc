@@ -104,7 +104,7 @@ module fpu64_addsub_normalize (
     reg ex3_sp_shift_right;
     reg ex3_dp_shift_right;
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_ex3 <= 1'b0;
             ex3_is_double <= 1'b0;
@@ -166,7 +166,7 @@ module fpu64_addsub_normalize (
         end
     end
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_out <= 1'b0;
             ex4_is_double <= 1'b0;
