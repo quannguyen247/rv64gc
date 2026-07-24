@@ -110,7 +110,7 @@ module fpu64_convert_f2i (
             pre_special = 1'b1;
             pre_special_flags[`FF_NV] = 1'b1;
             case (rs2_val)
-                5'd0: pre_special_result = 64'hFFFFFFFF_7FFFFFFF;
+                5'd0: pre_special_result = 64'h00000000_7FFFFFFF;
                 5'd1: pre_special_result = 64'hFFFFFFFF_FFFFFFFF;
                 5'd2: pre_special_result = 64'h7FFFFFFFFFFFFFFF;
                 5'd3: pre_special_result = 64'hFFFFFFFFFFFFFFFF;
@@ -129,7 +129,7 @@ module fpu64_convert_f2i (
                 endcase
             end else begin
                 case (rs2_val)
-                    5'd0: pre_special_result = 64'hFFFFFFFF_7FFFFFFF;
+                    5'd0: pre_special_result = 64'h00000000_7FFFFFFF;
                     5'd1: pre_special_result = 64'hFFFFFFFF_FFFFFFFF;
                     5'd2: pre_special_result = 64'h7FFFFFFFFFFFFFFF;
                     5'd3: pre_special_result = 64'hFFFFFFFFFFFFFFFF;
@@ -172,7 +172,7 @@ module fpu64_convert_f2i (
         end
     end
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_s1 <= 1'b0;
             special_s1 <= 1'b0;
@@ -200,7 +200,7 @@ module fpu64_convert_f2i (
         end
     end
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_s2 <= 1'b0;
             special_s2 <= 1'b0;
@@ -227,7 +227,7 @@ module fpu64_convert_f2i (
         end
     end
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_out <= 1'b0;
             result <= 64'd0;
@@ -235,7 +235,6 @@ module fpu64_convert_f2i (
         end else if (ready_s3) begin
             valid_out <= valid_s2;
             if (valid_s2) begin
-                result <= 64'd0;
                 fflags <= 5'd0;
                 if (special_s2) begin
                     result <= special_result_s2;
@@ -246,7 +245,7 @@ module fpu64_convert_f2i (
                         5'd0: begin
                             if (invalid_w_s2) begin
                                 result <= sign_s2 ? 64'hFFFFFFFF_80000000 :
-                                                    64'hFFFFFFFF_7FFFFFFF;
+                                                    64'h00000000_7FFFFFFF;
                                 fflags <= 5'd0;
                                 fflags[`FF_NV] <= 1'b1;
                             end else begin
@@ -281,8 +280,6 @@ module fpu64_convert_f2i (
                             end else begin
                                 result <= rounded_s2[63:0];
                             end
-                        end
-                        default: begin
                         end
                     endcase
                 end
