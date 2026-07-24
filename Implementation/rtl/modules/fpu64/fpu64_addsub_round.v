@@ -109,7 +109,7 @@ module fpu64_addsub_round (
     end
 
     // Sequential logic for pipeline register
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_ex5 <= 1'b0;
             ex5_res <= 64'd0;
