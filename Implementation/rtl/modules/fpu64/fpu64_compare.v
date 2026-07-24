@@ -61,7 +61,7 @@ module fpu64_compare (
         .is_eq(cmp_eq)
     );
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_out <= 1'b0;
             result <= 64'd0;
