@@ -90,7 +90,7 @@ module fpu64_addsub_prepare (
     wire sp_swap = (sp_exp2_ext > sp_exp1_ext) || ((sp_exp1_ext == sp_exp2_ext) && (sp_m2_ext > sp_m1_ext));
     wire dp_swap = (dp_exp2_ext > dp_exp1_ext) || ((dp_exp1_ext == dp_exp2_ext) && (dp_m2_ext > dp_m1_ext));
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_out <= 1'b0;
             ex1_is_double <= 1'b0;
