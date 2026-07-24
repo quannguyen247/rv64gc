@@ -68,7 +68,7 @@ module fpu64_addsub_align_add (
     wire [56:0] dp_op1_align;
     wire [56:0] dp_op2_align;
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_out <= 1'b0;
             ex2_is_double <= 1'b0;
