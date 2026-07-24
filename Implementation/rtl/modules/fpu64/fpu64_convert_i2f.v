@@ -158,7 +158,7 @@ module fpu64_convert_i2f (
         endcase
     end
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_s1 <= 1'b0;
             sign_s1 <= 1'b0;
@@ -176,7 +176,7 @@ module fpu64_convert_i2f (
         end
     end
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_s2 <= 1'b0;
             sign_s2 <= 1'b0;
@@ -198,7 +198,7 @@ module fpu64_convert_i2f (
         end
     end
 
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             valid_out <= 1'b0;
             result <= 64'd0;
@@ -206,7 +206,6 @@ module fpu64_convert_i2f (
         end else if (ready_s3) begin
             valid_out <= valid_s2;
             if (valid_s2) begin
-                result <= 64'd0;
                 fflags <= 5'd0;
                 if (zero_s2) begin
                     result <= is_double_s2 ?
